@@ -36,11 +36,13 @@ class AgentOrchestrator {
         messages:    messages,
         stream:      true,
         max_tokens:  CONFIG.MAX_TOKENS,
-        temperature: CONFIG.TEMPERATURE,
-        reasoning: {
-          effort: 'high'
-        }
+        temperature: CONFIG.TEMPERATURE
       };
+
+      // Seuls les agents d'analyse profonde ont besoin du "Extended Thinking" (coûteux en tokens et temps)
+      if (['market', 'business', 'financial', 'audit'].includes(agentId)) {
+        requestBody.reasoning = { effort: 'high' };
+      }
 
     let response;
     try {
