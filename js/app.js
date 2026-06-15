@@ -300,7 +300,7 @@ function validateCurrentStep() {
 
     App.formData.entrepreneurName     = name;
     App.formData.entrepreneurActivity = act;
-    App.formData.entrepreneurTitle    = $('title-select') ? $('title-select').options[$('title-select').selectedIndex]?.text : '';
+    App.formData.entrepreneurTitle    = $('entrepreneur-title') ? $('entrepreneur-title').options[$('entrepreneur-title').selectedIndex]?.text : '';
     App.formData.entrepreneurExp      = $('experience-select') ? $('experience-select').options[$('experience-select').selectedIndex]?.text : '';
     App.formData.legalForm            = $('legal-form-select') ? $('legal-form-select').options[$('legal-form-select').selectedIndex]?.text : '';
     App.formData.projectName          = proj;
