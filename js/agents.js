@@ -145,6 +145,8 @@ class AgentOrchestrator {
     };
 
     try {
+      const delay = ms => new Promise(res => setTimeout(res, ms));
+
 
       // ─── AGENT 1: MARKET ANALYSIS ────────────────────────────
       this.onProgress('market', 'running', 0);
@@ -155,6 +157,7 @@ class AgentOrchestrator {
       this.onProgress('market', 'done', 16);
 
       if (this.aborted) return;
+      await delay(4000); // Pause API pour éviter le Rate Limiting
 
       // ─── AGENT 2: BUSINESS MODEL ──────────────────────────────
       this.onProgress('business', 'running', 16);
@@ -165,6 +168,7 @@ class AgentOrchestrator {
       this.onProgress('business', 'done', 33);
 
       if (this.aborted) return;
+      await delay(4000);
 
       // ─── AGENT 3: FINANCIAL PROJECTIONS ──────────────────────
       this.onProgress('financial', 'running', 33);
@@ -175,6 +179,7 @@ class AgentOrchestrator {
       this.onProgress('financial', 'done', 50);
 
       if (this.aborted) return;
+      await delay(4000);
 
       // ─── AGENT 4: WRITER ──────────────────────────────────────
       this.onProgress('writer', 'running', 50);
@@ -185,6 +190,7 @@ class AgentOrchestrator {
       this.onProgress('writer', 'done', 66);
 
       if (this.aborted) return;
+      await delay(4000);
 
       // ─── AGENT 5: AUDIT / RED TEAM ────────────────────────────
       this.onProgress('audit', 'running', 66);
@@ -195,6 +201,7 @@ class AgentOrchestrator {
       this.onProgress('audit', 'done', 83);
 
       if (this.aborted) return;
+      await delay(4000);
 
       // ─── AGENT 6: VALIDATOR (Version finale) ──────────────────
       this.onProgress('validator', 'running', 83);
@@ -225,8 +232,11 @@ class AgentOrchestrator {
         console.log('Génération annulée par l\'utilisateur.');
         return null;
       }
-      this.onError(err);
-      throw err;
+      
+      console.error('Erreur API détaillée:', err);
+      const customErr = new Error(`L'API a bloqué la requête (Trop de requêtes ou Plus de tokens). Raison: ${msg}`);
+      this.onError(customErr);
+      throw customErr;
     }
   }
 
