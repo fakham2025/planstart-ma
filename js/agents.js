@@ -39,10 +39,8 @@ class AgentOrchestrator {
         temperature: CONFIG.TEMPERATURE
       };
 
-      // Seuls les agents d'analyse profonde ont besoin du "Extended Thinking" (coûteux en tokens et temps)
-      if (['market', 'business', 'financial', 'audit'].includes(agentId)) {
-        requestBody.reasoning = { effort: 'high' };
-      }
+      // Le "Extended Thinking" a été désactivé pour tous les agents afin de 
+      // réduire drastiquement la consommation de tokens et éviter les erreurs d'API.
 
     let response;
     try {
