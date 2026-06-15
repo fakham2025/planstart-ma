@@ -11,6 +11,7 @@ const App = {
   orchestrator:   null,
   generatedPlan:  null,
   generatedMeta:  null,
+  currentPlanId:  null,
   agentProgress:  {},   // { agentId: 'pending'|'running'|'done' }
 
   // Form data — entrepreneur + project
@@ -38,6 +39,20 @@ const App = {
     language: 'fr', detailLevel: 'complet'
   }
 };
+
+let saveTimeout = null;
+function schedulePlanSave(status = 'draft') {
+  if (!App.currentPlanId && !App.generatedPlan) return;
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async () => {
+    try {
+      const name = App.formData.projectName || App.generatedMeta?.projectName || 'Plan Incomplet';
+      App.currentPlanId = await SupabaseClient.savePlan(App.currentPlanId, name, App.generatedPlan || '', status);
+    } catch (e) {
+      console.error('Auto-save error', e);
+    }
+  }, 2000);
+}
 
 /* ── DOM REFS ────────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -186,6 +201,62 @@ function bindEvents() {
   if ($('btn-export-html')) $('btn-export-html').addEventListener('click', exportHTML);
   if ($('btn-export-word')) $('btn-export-word').addEventListener('click', exportWord);
   if ($('btn-continue')) $('btn-continue').addEventListener('click', continueGeneration);
+  
+  if ($('btn-my-plans')) {
+    $('btn-my-plans').addEventListener('click', async () => {
+      $('modal-my-plans').style.display = 'flex';
+      $('my-plans-list').innerHTML = '<p style="text-align:center; color:#888;">Chargement...</p>';
+      try {
+        const plans = await SupabaseClient.listPlans();
+        if (!plans || plans.length === 0) {
+           $('my-plans-list').innerHTML = '<p style="text-align:center; color:#888;">Aucun plan sauvegardé.</p>';
+           return;
+        }
+        $('my-plans-list').innerHTML = plans.map(p => \`
+          <div style="background:#2a2a3c; padding:15px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:bold; color:white; margin-bottom:4px;">\${p.project_name || 'Sans titre'}</div>
+              <div style="font-size:12px; color:#aaa;">\${new Date(p.updated_at).toLocaleString()} - \${p.status}</div>
+            </div>
+            <button onclick="window.loadPlan('\${p.id}')" class="btn btn-primary btn-sm">Ouvrir</button>
+          </div>
+        \`).join('');
+      } catch (e) {
+        $('my-plans-list').innerHTML = '<p style="text-align:center; color:red;">Erreur de chargement.</p>';
+      }
+    });
+  }
+
+  // Global function called from modal
+  window.loadPlan = async function(id) {
+    try {
+      $('modal-my-plans').style.display = 'none';
+      setView('generating');
+      $('stream-text').textContent = '';
+      const titleEl = $('streaming-agent-name');
+      if (titleEl) titleEl.textContent = '⏳ Chargement du plan...';
+      
+      const plan = await SupabaseClient.loadPlan(id);
+      
+      App.currentPlanId = plan.id;
+      App.generatedPlan = plan.content || '';
+      App.generatedMeta = { projectName: plan.project_name };
+      
+      if (plan.content) {
+        if (typeof Editor !== 'undefined') Editor.init(plan.content);
+        displayBusinessPlan(plan.content, App.generatedMeta);
+        setView('result');
+        if (typeof renderMarkdownToPreview === 'function') renderMarkdownToPreview(plan.content);
+        showToast('✅ Plan chargé', 'success');
+      } else {
+        showToast('⚠️ Plan vide', 'warning');
+        setView('setup');
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Erreur au chargement', 'error');
+    }
+  };
 
   // Abort
   $('btn-abort').addEventListener('click', abortGeneration);
@@ -481,6 +552,8 @@ async function startGeneration() {
   });
 
   try {
+    // Initialiser le plan en BD
+    App.currentPlanId = await SupabaseClient.savePlan(null, fd.projectName, '', 'generating');
     await App.orchestrator.run(App.formData, App.currentLang);
   } catch (err) {
     const msg = err && err.message ? err.message : String(err);
@@ -545,16 +618,21 @@ function handleError(err) {
   console.error('User-facing error:', msg);
 }
 
-function handleComplete({ finalPlan, metadata }) {
-  App.generatedPlan = finalPlan;
-  App.generatedMeta = metadata;
+function handleComplete(result) {
+  Editor.init(result.finalPlan);
+  App.generatedPlan = result.finalPlan;
+  App.generatedMeta = result.metadata;
+  
+  // Sauvegarde finale
+  schedulePlanSave('completed');
 
-  displayBusinessPlan(finalPlan, metadata);
+  // Fill review textarea
+  displayBusinessPlan(result.finalPlan, result.metadata);
   setView('result');
 
   // Init the inline editor with the generated markdown
   if (typeof initEditor === 'function') {
-    initEditor(finalPlan);
+    initEditor(result.finalPlan);
   }
 
   showToast('✅ Business plan généré ! Vous pouvez l\'éditer avant export.', 'success');
@@ -778,6 +856,7 @@ async function continueGeneration() {
               if (typeof renderMarkdownToPreview === 'function') {
                 renderMarkdownToPreview(App.generatedPlan);
               }
+              schedulePlanSave('draft');
             }
           }
         } catch (e) {}

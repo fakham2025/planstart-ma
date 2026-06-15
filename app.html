@@ -26,6 +26,9 @@
     </div>
 
     <div class="nav-actions">
+      <button type="button" id="btn-my-plans" class="btn btn-outline-gold btn-sm" style="margin-right: 10px;">
+        📂 Mes Plans
+      </button>
       <a href="index.html" class="btn btn-ghost btn-sm">← Accueil</a>
     </div>
   </div>
@@ -794,6 +797,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <!-- ── DEBUG: Global error catcher ──────────────────────────────── -->
+<!-- Modal Mes Plans -->
+<div id="modal-my-plans" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+  <div style="background:#1e1e2d; padding:20px; border-radius:12px; width:500px; max-width:90%; color:white; border: 1px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h2 style="margin:0; font-size:18px; color:var(--gold);">📂 Mes Plans Sauvegardés</h2>
+      <button onclick="document.getElementById('modal-my-plans').style.display='none'" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+    </div>
+    <div id="my-plans-list" style="max-height:400px; overflow-y:auto; font-size:14px;">
+      <p style="text-align:center; color:#888;">Chargement...</p>
+    </div>
+  </div>
+</div>
+
 <script>
   window.onerror = function(msg, src, line, col, err) {
     const info = `JS Error: ${msg}\nSource: ${src}:${line}:${col}`;
@@ -822,6 +838,8 @@
 </script>
 
 <!-- ── APP SCRIPTS ───────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
 <script src="js/config.js"></script>
 <script src="js/prompts.js"></script>
 <script src="js/agents.js"></script>

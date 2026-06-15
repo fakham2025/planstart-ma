@@ -232,6 +232,8 @@ function saveEdits() {
   const newMd = ta ? ta.value : Editor.currentMd;
   Editor.currentMd = newMd;
   App.generatedPlan = newMd;   // update source of truth for PDF export
+  
+  if (typeof schedulePlanSave === 'function') schedulePlanSave('completed');
 
   // Re-render the preview panel
   renderMarkdownToPreview(newMd);
