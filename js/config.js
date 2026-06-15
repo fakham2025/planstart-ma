@@ -13,7 +13,7 @@ const CONFIG = {
   SITE_TITLE:   'PlanStart.ma',
 
   // ── Modèle fixe ────────────────────────────────────────────────
-  DEFAULT_MODEL: 'anthropic/claude-sonnet-4.6',
+  DEFAULT_MODEL: 'anthropic/claude-3.5-haiku-20241022',
   MAX_TOKENS:    8000,
   TEMPERATURE:   1,
 

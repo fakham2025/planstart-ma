@@ -723,25 +723,33 @@ async function exportPDF() {
   btn.disabled = true;
 
   try {
-    // Create a clean white version for PDF
-    const pdfContent = createPDFContent(App.generatedPlan, App.generatedMeta);
-
-    // Use html2pdf.js
+    const htmlString = createPDFContentString(App.generatedPlan, App.generatedMeta);
+    
     if (typeof html2pdf !== 'undefined') {
       const opt = {
         margin:       [15, 15, 15, 15],
         filename:     `BusinessPlan_${App.generatedMeta.projectName.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.95 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      await html2pdf().set(opt).from(pdfContent).save();
-      document.body.removeChild(pdfContent);
+      // Create a temporary container that is visible but absolute
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlString;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.top = '0';
+      tempDiv.style.left = '0';
+      tempDiv.style.width = '210mm';
+      tempDiv.style.zIndex = '-1';
+      tempDiv.style.background = 'white';
+      document.body.appendChild(tempDiv);
+
+      await html2pdf().set(opt).from(tempDiv).save();
+      
+      document.body.removeChild(tempDiv);
       showToast('✅ PDF exporté avec succès !', 'success');
     } else {
-      // Fallback: print
       window.print();
-      showToast('💡 Utilisez Ctrl+P pour imprimer en PDF', 'info');
     }
   } catch (err) {
     console.error('PDF export error:', err);
@@ -752,22 +760,7 @@ async function exportPDF() {
   }
 }
 
-function createPDFContent(markdown, metadata) {
-  const div = document.createElement('div');
-  div.style.cssText = `
-    position: fixed;
-    left: -9999px;
-    top: 0;
-    width: 210mm;
-    background: white;
-    color: #1a1a1a;
-    font-family: 'Georgia', serif;
-    font-size: 12px;
-    line-height: 1.6;
-    padding: 20mm;
-  `;
-
-  // Render markdown
+function createPDFContentString(markdown, metadata) {
   let html = '';
   if (typeof marked !== 'undefined') {
     html = marked.parse(markdown);
@@ -775,37 +768,27 @@ function createPDFContent(markdown, metadata) {
     html = basicMarkdown(markdown);
   }
 
-  // Add PDF styles
-  div.innerHTML = `
-    <style>
-      h1 { font-size: 24px; color: #8B6914; margin-bottom: 4px; }
-      h2 { font-size: 16px; color: #8B6914; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin-top: 24px; }
-      h3 { font-size: 14px; font-weight: bold; margin-top: 16px; }
-      h4 { font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; letter-spacing: 0.05em; }
-      p  { color: #333; margin-bottom: 8px; }
-      li { color: #333; margin-bottom: 4px; }
-      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 11px; }
-      th { background: #FFF8E8; color: #8B6914; padding: 8px; text-align: left; border-bottom: 1px solid #ddd; font-weight: bold; }
-      td { padding: 7px 8px; border-bottom: 1px solid #eee; }
-      strong { color: #111; }
-      blockquote { border-left: 3px solid #C9A84C; padding: 8px 12px; background: #FFFBF0; margin: 8px 0; }
-      hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
-      .pdf-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #C9A84C; }
-      .pdf-header .company { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
-      .pdf-meta { font-size: 10px; color: #888; margin-top: 4px; }
-    </style>
-    <div class="pdf-header">
-      <div class="company">🇲🇦 PlanStart.ma</div>
-      <div class="pdf-meta">Généré le ${new Date().toLocaleDateString('fr-MA')} • ${metadata.sector} • Confidentiel</div>
-    </div>
-    ${html}
-    <div style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 10px; color: #888; text-align: center;">
-      Document généré par PlanStart.ma — Générateur de Business Plans pour Startups Marocaines
+  return `
+    <div style="font-family: 'Georgia', serif; font-size: 12px; line-height: 1.6; color: #000; padding: 20px;">
+      <style>
+        h1 { font-size: 24px; color: #8B6914; margin-bottom: 4px; }
+        h2 { font-size: 16px; color: #8B6914; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin-top: 24px; }
+        h3 { font-size: 14px; font-weight: bold; margin-top: 16px; color: #333; }
+        p  { color: #000; margin-bottom: 8px; }
+        li { color: #000; margin-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 11px; }
+        th { background: #FFF8E8; color: #8B6914; padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        td { padding: 7px 8px; border-bottom: 1px solid #eee; }
+        .pdf-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #C9A84C; }
+        .pdf-meta { font-size: 10px; color: #888; margin-top: 4px; }
+      </style>
+      <div class="pdf-header">
+        <strong style="color:#888;">🇲🇦 PlanStart.ma</strong>
+        <div class="pdf-meta">Généré le ${new Date().toLocaleDateString('fr-MA')} • ${metadata.sector || 'Secteur'} • Confidentiel</div>
+      </div>
+      ${html}
     </div>
   `;
-
-  document.body.appendChild(div);
-  return div;
 }
 
 /* ── HTML EXPORT ─────────────────────────────────────────────────── */
@@ -872,14 +855,16 @@ function exportWord() {
     htmlContent = basicMarkdown(App.generatedPlan);
   }
 
-  // Microsoft Word can open HTML files formatted a certain way if saved with .doc extension
+  // MS Word requires specific wrapping to render HTML properly inside a .doc file
   const wordHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head><meta charset='utf-8'><title>Business Plan</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]-->
 <style>
-  body { font-family: Calibri, sans-serif; }
+  body { font-family: 'Calibri', sans-serif; color: #000; }
   h1 { color: #8B6914; font-size: 24pt; }
   h2 { color: #8B6914; font-size: 16pt; border-bottom: 1px solid #ddd; }
   h3 { color: #333; font-size: 13pt; }
+  p, li { font-size: 11pt; color: #000; }
   table { border-collapse: collapse; width: 100%; }
   th, td { border: 1px solid #000; padding: 5px; }
   th { background-color: #f0f0f0; }
