@@ -368,7 +368,10 @@ Assure-toi que chaque section est :
 ✅ Contextualisée au marché de ${data.city} et au secteur ${data.sectorLabel}
 ✅ Personnalisée au profil réel de ${data.entrepreneurName || 'le porteur'}
 ✅ Cohérente avec les chiffres financiers fournis
-✅ Prête à soumettre à un CRI, une banque ou un investisseur au Maroc`
+✅ Prête à soumettre à un CRI, une banque ou un investisseur au Maroc
+
+⚠️ INSTRUCTION CRITIQUE SUR LA LONGUEUR ⚠️
+TU DOIS IMPÉRATIVEMENT ÉCRIRE LES 12 SECTIONS JUSQU'À LA TOUTE DERNIÈRE (Section 12). NE T'ARRÊTE SOUS AUCUN PRÉTEXTE AVANT LA FIN DU DOCUMENT. SI BESOIN, SOIS SYNTHÉTIQUE ET DIRECT DANS TES EXPLICATIONS POUR T'ASSURER DE TOUT TERMINER. IL EST STRICTEMENT INTERDIT DE COUPER LE DOCUMENT EN COURS DE ROUTE.`
       }
     ];
   },
@@ -451,10 +454,13 @@ Instructions :
 
 IMPORTANT :
 - Produis le document **COMPLET** (pas juste les corrections)
-- Conserve la structure en 11 sections
+- Conserve la structure en 12 sections complètes
 - Chaque section doit être substantielle et convaincante
 - Les chiffres doivent être cohérents dans tout le document
 - Commence directement par le business plan, sans préambule
+
+⚠️ INSTRUCTION CRITIQUE SUR LA LONGUEUR ⚠️
+TU DOIS IMPÉRATIVEMENT ÉCRIRE LES 12 SECTIONS JUSQU'À LA TOUTE DERNIÈRE (Section 12). NE T'ARRÊTE SOUS AUCUN PRÉTEXTE AVANT LA FIN DU DOCUMENT. SI BESOIN, SOIS SYNTHÉTIQUE ET ALLÈGE LE TEXTE DES PREMIÈRES SECTIONS POUR T'ASSURER DE TOUT TERMINER. IL EST STRICTEMENT INTERDIT DE COUPER LE DOCUMENT EN COURS DE ROUTE. LE RENDU DOIT ÊTRE UN SEUL BLOC.`
 
 Format : Business plan complet en Markdown professionnel`
       }
