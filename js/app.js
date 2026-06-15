@@ -185,6 +185,7 @@ function bindEvents() {
   $('btn-export-pdf').addEventListener('click', exportPDF);
   if ($('btn-export-html')) $('btn-export-html').addEventListener('click', exportHTML);
   if ($('btn-export-word')) $('btn-export-word').addEventListener('click', exportWord);
+  if ($('btn-continue')) $('btn-continue').addEventListener('click', continueGeneration);
 
   // Abort
   $('btn-abort').addEventListener('click', abortGeneration);
@@ -708,6 +709,88 @@ function basicMarkdown(text) {
     .replace(/\n\n/g, '</p><p>')
     .replace(/^(?!<[h|u|l|t|h|p|b])/gm, '<p>')
     .replace(/(<p>[^<]+)$/gm, '$1</p>');
+}
+
+/* ── CONTINUE GENERATION ────────────────────────────────────────── */
+async function continueGeneration() {
+  if (!App.generatedPlan) {
+    showToast('⚠️ Aucun plan à continuer', 'error');
+    return;
+  }
+
+  const btn = $('btn-continue');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Rédaction en cours...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch(CONFIG.API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Authorization': \`Bearer \${CONFIG.API_KEY_OPENROUTER}\`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': CONFIG.APP_URL,
+        'X-Title': CONFIG.APP_NAME
+      },
+      body: JSON.stringify({
+        model: CONFIG.DEFAULT_MODEL,
+        messages: [
+          { role: 'system', content: 'Tu es un expert rédacteur de business plans. Tu dois continuer la rédaction du document de manière fluide, professionnelle, sans rien répéter et sans introduction.' },
+          { role: 'user', content: "Continue exactement là où tu t'es arrêté dans le texte suivant, commence par la suite immédiate :\n\n" + App.generatedPlan.slice(-2000) }
+        ],
+        stream: true,
+        max_tokens: 4000,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) throw new Error('API Error ' + response.status);
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith('data:')) continue;
+        const data = trimmed.slice(5).trim();
+        if (data === '[DONE]') continue;
+
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content && typeof content === 'string') {
+            App.generatedPlan += content;
+            if (typeof Editor !== 'undefined') {
+              Editor.currentMd = App.generatedPlan;
+              const editTa = document.getElementById('plan-editor-textarea');
+              const splitTa = document.getElementById('plan-split-textarea');
+              if (editTa) editTa.value = App.generatedPlan;
+              if (splitTa) splitTa.value = App.generatedPlan;
+              if (typeof renderMarkdownToPreview === 'function') {
+                renderMarkdownToPreview(App.generatedPlan);
+              }
+            }
+          }
+        } catch (e) {}
+      }
+    }
+    showToast('✅ Rédaction continuée avec succès !', 'success');
+  } catch (err) {
+    console.error('Continue error:', err);
+    showToast('❌ Erreur lors de la continuation', 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
 }
 
 /* ── PDF EXPORT ──────────────────────────────────────────────────── */
