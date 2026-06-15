@@ -29,101 +29,124 @@ class AgentOrchestrator {
 
     this._controller = new AbortController();
 
-    // Construire le body de la requête
-    // OpenRouter utilise "reasoning" (pas "thinking") pour activer le Extended Thinking
+    let currentMessages = [...messages];
+    let fullContent = '';
+    let isFinished = false;
+
+    while (!isFinished) {
+      if (this.aborted) throw new Error('ABORTED');
+
       const requestBody = {
         model:       this.model,
-        messages:    messages,
+        messages:    currentMessages,
         stream:      true,
         max_tokens:  CONFIG.MAX_TOKENS,
         temperature: CONFIG.TEMPERATURE
       };
 
-      // Le "Extended Thinking" a été désactivé pour tous les agents afin de 
-      // réduire drastiquement la consommation de tokens et éviter les erreurs d'API.
-
-    let response;
-    try {
-      response = await fetch(CONFIG.API_ENDPOINT, {
-        method:  'POST',
-        signal:  this._controller.signal,
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type':  'application/json',
-          'HTTP-Referer':  CONFIG.APP_URL,
-          'X-Title':       CONFIG.APP_NAME
-        },
-        body: JSON.stringify(requestBody)
-      });
-    } catch (fetchErr) {
-      const msg = fetchErr.message || String(fetchErr);
-      console.error(`[${agentId}] Fetch error:`, msg);
-      throw new Error(`Network error: ${msg}`);
-    }
-
-    if (!response.ok) {
-      let errBody = '';
-      try { errBody = await response.text(); } catch {}
-      const errMsg = `API Error ${response.status} ${response.statusText}${errBody ? ': ' + errBody.substring(0, 200) : ''}`;
-      console.error(`[${agentId}] ${errMsg}`);
-      throw new Error(errMsg);
-    }
-
-    const reader  = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let   fullContent = '';
-    let   buffer      = '';
-
-    while (true) {
-      if (this.aborted) {
-        reader.cancel();
-        throw new Error('ABORTED');
+      let response;
+      try {
+        response = await fetch(CONFIG.API_ENDPOINT, {
+          method:  'POST',
+          signal:  this._controller.signal,
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type':  'application/json',
+            'HTTP-Referer':  CONFIG.APP_URL,
+            'X-Title':       CONFIG.APP_NAME
+          },
+          body: JSON.stringify(requestBody)
+        });
+      } catch (fetchErr) {
+        const msg = fetchErr.message || String(fetchErr);
+        console.error(`[${agentId}] Fetch error:`, msg);
+        throw new Error(`Network error: ${msg}`);
       }
 
-      const { done, value } = await reader.read();
-      if (done) break;
+      if (!response.ok) {
+        let errBody = '';
+        try { errBody = await response.text(); } catch {}
+        const errMsg = `API Error ${response.status} ${response.statusText}${errBody ? ': ' + errBody.substring(0, 200) : ''}`;
+        console.error(`[${agentId}] ${errMsg}`);
+        throw new Error(errMsg);
+      }
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // Garder la ligne incomplète dans le buffer
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let   buffer       = '';
+      let   chunkContent = '';
+      let   finishReason = null;
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith('data:')) continue;
-
-        const data = trimmed.slice(5).trim();
-        if (data === '[DONE]') continue;
-
-        let parsed;
-        try {
-          parsed = JSON.parse(data);
-        } catch {
-          continue; // Ignorer les chunks non-parseable
+      while (true) {
+        if (this.aborted) {
+          reader.cancel();
+          throw new Error('ABORTED');
         }
 
-        if (parsed.error) {
-          throw new Error(parsed.error.message || 'API Error in stream');
-        }
+        const { done, value } = await reader.read();
+        if (done) break;
 
-        const delta  = parsed.choices?.[0]?.delta;
-        if (!delta) continue;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // Garder la ligne incomplète dans le buffer
 
-        const content = delta.content;
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data:')) continue;
 
-        if (typeof content === 'string' && content) {
-          // Format texte simple (la plupart des modèles)
-          fullContent += content;
-          this.onStream(agentId, content, fullContent);
+          const data = trimmed.slice(5).trim();
+          if (data === '[DONE]') continue;
 
-        } else if (Array.isArray(content)) {
-          // Format bloc structuré (Claude Extended Thinking)
-          for (const block of content) {
-            if (block.type === 'text' && block.text) {
-              fullContent += block.text;
-              this.onStream(agentId, block.text, fullContent);
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch {
+            continue; // Ignorer les chunks non-parseable
+          }
+
+          if (parsed.error) {
+            throw new Error(parsed.error.message || 'API Error in stream');
+          }
+
+          const choice = parsed.choices?.[0];
+          if (!choice) continue;
+
+          if (choice.finish_reason) {
+            finishReason = choice.finish_reason;
+          }
+
+          const delta  = choice.delta;
+          if (!delta) continue;
+
+          const content = delta.content;
+
+          if (typeof content === 'string' && content) {
+            chunkContent += content;
+            fullContent  += content;
+            this.onStream(agentId, content, fullContent);
+
+          } else if (Array.isArray(content)) {
+            for (const block of content) {
+              if (block.type === 'text' && block.text) {
+                chunkContent += block.text;
+                fullContent  += block.text;
+                this.onStream(agentId, block.text, fullContent);
+              }
             }
           }
         }
+      }
+
+      // Check why the generation stopped
+      if (finishReason === 'length' || finishReason === 'max_tokens') {
+        console.warn(`[${agentId}] Token limit reached. Auto-continuing...`);
+        // Append what the AI just generated to the context
+        currentMessages.push({ role: 'assistant', content: chunkContent });
+        // Ask it to continue exactly where it left off
+        currentMessages.push({ role: 'user', content: "Continue exactement là où tu t'es arrêté (ne répète pas ce qui a déjà été dit, commence par le mot suivant direct)." });
+        // The while loop will run again and seamlessly append to fullContent!
+      } else {
+        isFinished = true;
       }
     }
 
