@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Générez votre business plan pour startup marocaine avec 6 agents IA spécialisés.">
+  <title>Générateur — PlanStart.ma</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+</head>
+<body class="app-body">
+
+<!-- ── NAVIGATION ──────────────────────────────────────────────── -->
+<nav class="navbar" role="navigation" aria-label="Navigation application">
+  <div class="nav-inner">
+    <a href="index.html" class="logo" aria-label="PlanStart.ma Accueil">
+      <div class="logo-mark" aria-hidden="true">🚀</div>
+      <div class="logo-wordmark">Plan<em>Start</em>.ma</div>
+    </a>
+
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-muted);">
+      <span>Générateur de Business Plans</span>
+      <span style="color:var(--border);">|</span>
+      <span style="color:var(--gold);font-weight:700;">🇲🇦 Multi-Agent IA</span>
+    </div>
+
+    <div class="nav-actions">
+      <a href="index.html" class="btn btn-ghost btn-sm">← Accueil</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── APP LAYOUT ───────────────────────────────────────────────── -->
+<div class="app-layout">
+
+  <!-- ── LEFT SIDEBAR: FORM ────────────────────────────────────── -->
+  <aside class="app-sidebar" role="complementary" aria-label="Formulaire de création">
+
+    <!-- Sidebar Header -->
+    <div class="sidebar-top">
+      <div class="sidebar-top-title">✨ Nouveau Business Plan</div>
+      <div class="sidebar-top-desc">Remplissez les informations de votre projet</div>
+    </div>
+
+    <!-- Modèle IA actif (affiché, non modifiable) -->
+    <div class="model-badge-bar">
+      <div class="model-badge-label">Modèle IA</div>
+      <div class="model-badge-active">
+        <div class="model-badge-dot"></div>
+        <span>Claude Sonnet (Dernier) — Extended Thinking</span>
+        <span class="model-badge-tag">💎 Premium</span>
+      </div>
+    </div>
+
+    <!-- Step Progress -->
+    <div class="step-progress" aria-label="Progression du formulaire">
+      <div id="step-pills" style="display:flex;gap:6px;flex:1;"></div>
+      <div id="step-label" class="step-progress-label" aria-live="polite">Étape 1/4</div>
+    </div>
+
+    <!-- Form Scrollable Area -->
+    <div class="form-scroll" id="form-scroll">
+
+      <!-- ─── STEP 1: Fiche Entrepreneur ──────────────────────── -->
+      <div class="form-step active" id="step-1" role="form" aria-label="Étape 1: Fiche Entrepreneur">
+        <div class="form-step-header">
+          <div class="form-step-badge">Étape 1</div>
+          <div class="form-step-title">Fiche Entrepreneur 👤</div>
+          <div class="form-step-desc">Informations sur le porteur de projet</div>
+        </div>
+
+        <!-- Titre & Nom -->
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" for="entrepreneur-title">
+              Titre <span class="hint">* obligatoire</span>
+            </label>
+            <select id="entrepreneur-title" class="form-select" required aria-required="true">
+              <option value="">— Titre —</option>
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label class="form-label" for="entrepreneur-name">
+              Nom complet <span class="hint">* obligatoire</span>
+            </label>
+            <input
+              type="text"
+              id="entrepreneur-name"
+              class="form-input"
+              placeholder="ex: Ahmed Bennani, Fatima Zahra El Idrissi..."
+              maxlength="80"
+              required
+              aria-required="true"
+            >
+          </div>
+        </div>
+
+        <!-- Activité précise -->
+        <div class="form-group">
+          <label class="form-label" for="entrepreneur-activity">
+            Activité exercée / Spécialité <span class="hint">* obligatoire</span>
+          </label>
+          <input
+            type="text"
+            id="entrepreneur-activity"
+            class="form-input"
+            placeholder="ex: Chirurgien-dentiste spécialisé en implantologie, Consultant en stratégie d'entreprise..."
+            maxlength="120"
+            required
+            aria-required="true"
+          >
+          <div style="margin-top:5px;font-size:11px;color:var(--text-muted);">
+            Soyez précis — cette info sera injectée dans tous les agents IA
+          </div>
+        </div>
+
+        <!-- Expérience & Statut juridique -->
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" for="experience-select">
+              Expérience professionnelle
+            </label>
+            <select id="experience-select" class="form-select">
+              <option value="">— Expérience —</option>
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="legal-form-select">
+              Statut juridique envisagé
+            </label>
+            <select id="legal-form-select" class="form-select">
+              <option value="">— Statut —</option>
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Adresse complète -->
+        <div class="entrepreneur-address-section">
+          <div class="address-section-label">📍 Adresse professionnelle / Cabinet</div>
+
+          <div class="form-group">
+            <label class="form-label" for="address-street">
+              N° et Rue / Avenue / Boulevard <span class="hint">* obligatoire</span>
+            </label>
+            <input
+              type="text"
+              id="address-street"
+              class="form-input"
+              placeholder="ex: 47 Rue Mohammed V, Av. Hassan II..."
+              maxlength="120"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="address-quartier">
+                Quartier / Immeuble
+              </label>
+              <input
+                type="text"
+                id="address-quartier"
+                class="form-input"
+                placeholder="ex: Maarif, Agdal, Résidence Al Fath..."
+                maxlength="80"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="address-cp">
+                Code postal
+              </label>
+              <input
+                type="text"
+                id="address-cp"
+                class="form-input"
+                placeholder="ex: 20000"
+                maxlength="10"
+              >
+            </div>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="entrepreneur-email">
+                Email professionnel
+              </label>
+              <input
+                type="email"
+                id="entrepreneur-email"
+                class="form-input"
+                placeholder="contact@cabinet.ma"
+                maxlength="80"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="entrepreneur-phone">
+                Téléphone
+              </label>
+              <input
+                type="tel"
+                id="entrepreneur-phone"
+                class="form-input"
+                placeholder="ex: +212 6xx xx xx xx"
+                maxlength="20"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Info box -->
+        <div class="info-box-gold" role="note">
+          <div class="info-box-title">💡 À quoi sert la fiche entrepreneur ?</div>
+          <div class="info-box-body">
+            Toutes ces informations sont transmises à chaque agent IA. Elles permettent de <strong>personnaliser</strong> le business plan avec votre identité professionnelle, votre expertise réelle et votre localisation exacte — rendant le document <strong>directement utilisable</strong> avec les CRI, banques et investisseurs marocains.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── STEP 2: Le Projet ─────────────────────────────────── -->
+      <div class="form-step" id="step-2" role="form" aria-label="Étape 2: Le Projet">
+        <div class="form-step-header">
+          <div class="form-step-badge">Étape 2</div>
+          <div class="form-step-title">Le Projet ✨</div>
+          <div class="form-step-desc">Votre activité et nom de structure</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="project-name">
+            Nom de la structure / cabinet / société <span class="hint">* obligatoire</span>
+          </label>
+          <input
+            type="text"
+            id="project-name"
+            class="form-input"
+            placeholder="ex: Cabinet Dentaire Al Noor, CSD Conseil & Stratégie..."
+            maxlength="80"
+            required
+            aria-required="true"
+          >
+        </div>
+
+        <!-- Secteur par catégorie -->
+        <div class="form-group">
+          <label class="form-label" for="sector-select">
+            Secteur d'activité précis <span class="hint">* obligatoire</span>
+          </label>
+          <select id="sector-select" class="form-select" required aria-required="true">
+            <option value="">— Choisissez votre activité exacte —</option>
+            <!-- Populated by JS with optgroups by category -->
+          </select>
+          <div id="sector-badge" style="display:none;margin-top:8px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">
+            Description du projet <span class="hint">* obligatoire</span>
+          </label>
+          <textarea
+            id="description"
+            class="form-textarea"
+            placeholder="Décrivez votre projet en 2-4 phrases : Quelle structure ? Quels services offerts ? Pour quels patients/clients ? Dans quelle zone géographique ?"
+            rows="4"
+            required
+            aria-required="true"
+          ></textarea>
+        </div>
+
+        <div class="info-box-gold" role="note">
+          <div class="info-box-title">🎯 Conseil pour une meilleure analyse</div>
+          <div class="info-box-body">
+            Plus votre description est précise (type de clientèle, services, équipements envisagés, différenciation), plus les agents IA pourront produire une analyse de marché et des projections financières réalistes pour le marché marocain.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── STEP 3: Vision & Positionnement ──────────────────── -->
+      <div class="form-step" id="step-3" role="form" aria-label="Étape 3: Vision et positionnement">
+        <div class="form-step-header">
+          <div class="form-step-badge">Étape 3</div>
+          <div class="form-step-title">Vision & Positionnement 🎯</div>
+          <div class="form-step-desc">Votre avantage concurrentiel</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="problem">
+            Problème/besoin identifié sur le marché <span class="hint">* obligatoire</span>
+          </label>
+          <textarea
+            id="problem"
+            class="form-textarea"
+            placeholder="Quel manque ou problème avez-vous identifié dans votre zone ? Ex: Absence de cabinet dentaire spécialisé dans le quartier, manque d'accompagnement stratégique pour les PME locales..."
+            rows="3"
+            required
+            aria-required="true"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="unique-value">
+            Proposition de valeur unique <span class="hint">* obligatoire</span>
+          </label>
+          <textarea
+            id="unique-value"
+            class="form-textarea"
+            placeholder="En quoi votre cabinet/structure se distingue-t-il de la concurrence existante ? (équipements, expertise particulière, approche client, tarification, localisation...)"
+            rows="3"
+            required
+            aria-required="true"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="target-clients">
+            Cibles clientèle principale
+          </label>
+          <textarea
+            id="target-clients"
+            class="form-textarea"
+            placeholder="Décrivez vos patients/clients idéaux : profil socio-économique, tranche d'âge, localisation, comportements... Ex: Cadres 30-55 ans, classe moyenne-supérieure, quartier Maarif et Ain Chock..."
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- ─── STEP 4: Contexte Maroc ────────────────────────────── -->
+      <div class="form-step" id="step-4" role="form" aria-label="Étape 4: Contexte marocain">
+        <div class="form-step-header">
+          <div class="form-step-badge">Étape 4</div>
+          <div class="form-step-title">Contexte Marocain 🇲🇦</div>
+          <div class="form-step-desc">Données financières et organisationnelles</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="city-select">
+            Ville d'implantation <span class="hint">* obligatoire</span>
+          </label>
+          <select id="city-select" class="form-select" required aria-required="true">
+            <option value="">— Choisissez une ville —</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="address-zone">
+            Zone / Quartier d'implantation
+          </label>
+          <input
+            type="text"
+            id="address-zone"
+            class="form-input"
+            placeholder="ex: Centre-ville, Quartier Maarif, Zone industrielle Ain Sebaâ..."
+            maxlength="100"
+          >
+          <div style="margin-top:5px;font-size:11px;color:var(--text-muted);">
+            Précisez le quartier pour une analyse concurrentielle locale plus précise
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="capital">
+            Budget d'investissement total <span class="hint">* obligatoire</span>
+          </label>
+          <div class="capital-row">
+            <div class="capital-currency" aria-hidden="true">MAD</div>
+            <input
+              type="number"
+              id="capital"
+              class="form-input"
+              placeholder="ex: 500 000 pour un cabinet dentaire équipé"
+              min="1000"
+              max="50000000"
+              required
+              aria-required="true"
+              aria-label="Capital en MAD"
+            >
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">
+            Fonds propres + financement envisagé (CCG, banque, famille...)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="team-select">
+            Taille de l'équipe <span class="hint">* obligatoire</span>
+          </label>
+          <select id="team-select" class="form-select" required aria-required="true">
+            <option value="">— Taille de l'équipe —</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="opening-date">
+            Date d'ouverture prévue
+          </label>
+          <input
+            type="text"
+            id="opening-date"
+            class="form-input"
+            placeholder="ex: Janvier 2026, 1er trimestre 2026, Dans 6 mois..."
+            maxlength="50"
+          >
+        </div>
+
+      </div>
+
+      <!-- ─── STEP 5: Options & Génération ─────────────────────── -->
+      <div class="form-step" id="step-5" role="form" aria-label="Étape 5: Options de génération">
+        <div class="form-step-header">
+          <div class="form-step-badge">Étape 5</div>
+          <div class="form-step-title">Finalisation ⚡</div>
+          <div class="form-step-desc">Derniers réglages avant génération</div>
+        </div>
+
+        <!-- Language -->
+        <div class="form-group">
+          <label class="form-label">Langue du business plan</label>
+          <div class="lang-toggle" role="group" aria-label="Choix de la langue">
+            <button class="lang-opt active" data-lang="fr" type="button" aria-pressed="true">
+              🇫🇷 Français
+            </button>
+            <button class="lang-opt" data-lang="ar" type="button" aria-pressed="false">
+              🇲🇦 العربية
+            </button>
+          </div>
+        </div>
+
+        <!-- Detail Level -->
+        <div class="form-group">
+          <label class="form-label">Niveau de détail</label>
+          <div class="detail-grid" role="group" aria-label="Niveau de détail du plan">
+            <button class="detail-opt" data-level="resume" type="button" aria-pressed="false">
+              <span class="detail-icon">📄</span>
+              <span class="detail-label">Résumé</span>
+              <span class="detail-desc">~5 pages</span>
+            </button>
+            <button class="detail-opt active" data-level="complet" type="button" aria-pressed="true">
+              <span class="detail-icon">📋</span>
+              <span class="detail-label">Complet</span>
+              <span class="detail-desc">~15 pages</span>
+            </button>
+            <button class="detail-opt" data-level="investisseur" type="button" aria-pressed="false">
+              <span class="detail-icon">💎</span>
+              <span class="detail-label">Investisseur</span>
+              <span class="detail-desc">~25 pages</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Récapitulatif -->
+        <div id="summary-recap" style="background:var(--gold-glow);border:1px solid var(--border);border-radius:var(--r-md);padding:18px;margin-top:8px;" role="status" aria-live="polite">
+          <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">
+            ✅ Récapitulatif
+          </div>
+          <div id="summary-content" style="font-size:13px;color:var(--text-secondary);line-height:1.8;">
+            <strong style="color:var(--text-primary);">6 agents IA</strong> vont analyser votre projet en séquence :<br>
+            <span style="color:var(--text-muted);">🇲🇦 Marché → 💼 Business → 💰 Financier → ✍️ Rédaction → 🔍 Audit → ✅ Validation</span><br><br>
+            Durée estimée : <strong style="color:var(--gold);">2 à 5 minutes</strong>.
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div style="margin-top:20px;">
+          <button
+            type="button"
+            id="btn-generate-main"
+            class="btn-generate"
+            aria-label="Lancer la génération du business plan"
+          >
+            🚀 Générer mon Business Plan
+          </button>
+        </div>
+
+      </div>
+
+    </div><!-- /form-scroll -->
+
+    <!-- Form Footer Navigation -->
+    <div class="form-footer">
+      <div class="form-footer-info" aria-live="polite" id="form-status">
+        Remplissez tous les champs marqués *
+      </div>
+      <div class="form-nav-btns">
+        <button
+          type="button"
+          id="btn-prev"
+          class="btn btn-ghost btn-sm"
+          style="visibility:hidden;"
+          aria-label="Étape précédente"
+        >← Retour</button>
+        <button
+          type="button"
+          id="btn-next"
+          class="btn btn-primary btn-sm"
+          aria-label="Étape suivante"
+        >Suivant →</button>
+        <button
+          type="button"
+          id="btn-generate"
+          class="btn btn-primary btn-sm"
+          style="display:none;background:linear-gradient(135deg,#C9A84C,#E8C97A);color:#07070F;"
+          aria-label="Lancer la génération"
+        >🚀 Générer</button>
+      </div>
+    </div>
+
+  </aside>
+  <!-- /sidebar -->
+
+  <!-- ── RIGHT: MAIN CONTENT AREA ──────────────────────────────── -->
+  <main class="app-main" id="app-main" role="main" aria-label="Zone de génération">
+
+    <!-- ─── EMPTY STATE ─────────────────────────────────────────── -->
+    <div id="view-empty" class="empty-state" style="display:flex;">
+      <div class="empty-state-graphic">
+        <div class="empty-hexagon" aria-hidden="true">🚀</div>
+      </div>
+      <h3>Prêt à générer votre Business Plan</h3>
+      <p>
+        6 agents IA spécialisés travaillent en équipe pour créer un business plan de niveau investisseur, contextualisé au marché marocain.
+      </p>
+
+      <!-- Agent photo previews -->
+      <div class="empty-agents-preview" role="list" aria-label="Équipe d'agents IA">
+        <img class="empty-agent-avatar" src="assets/agents/market.png"    alt="Agent Marché"     title="Agent Marché 🇲🇦" onerror="this.style.display='none'">
+        <img class="empty-agent-avatar" src="assets/agents/business.png"  alt="Agent Business"   title="Agent Business 💼" onerror="this.style.display='none'">
+        <img class="empty-agent-avatar" src="assets/agents/financial.png" alt="Agent Financier"  title="Agent Financier 💰" onerror="this.style.display='none'">
+        <img class="empty-agent-avatar" src="assets/agents/writer.png"    alt="Agent Rédacteur"  title="Agent Rédacteur ✍️" onerror="this.style.display='none'">
+        <img class="empty-agent-avatar" src="assets/agents/audit.png"     alt="Agent Audit"      title="Agent Audit 🔍" onerror="this.style.display='none'">
+        <img class="empty-agent-avatar" src="assets/agents/validator.png" alt="Agent Validateur" title="Agent Validateur ✅" onerror="this.style.display='none'">
+        <span class="empty-agents-label">6 experts IA</span>
+      </div>
+
+      <div class="empty-features" role="list">
+        <div class="empty-feat-tag" role="listitem">🇲🇦 Marché marocain</div>
+        <div class="empty-feat-tag" role="listitem">💰 Financier en MAD</div>
+        <div class="empty-feat-tag" role="listitem">⚖️ Cadre légal marocain</div>
+        <div class="empty-feat-tag" role="listitem">📄 Export PDF</div>
+        <div class="empty-feat-tag" role="listitem">🌐 FR + العربية</div>
+      </div>
+    </div>
+
+    <!-- ─── GENERATION VIEW ────────────────────────────────────── -->
+    <div id="view-generating" style="display:none;padding:40px;" role="status" aria-label="Génération en cours" aria-live="polite">
+
+      <div class="gen-header">
+        <h2>🤖 Génération en cours...</h2>
+        <p>6 agents IA travaillent sur votre business plan. Veuillez patienter.</p>
+      </div>
+
+      <!-- Overall Progress -->
+      <div class="gen-progress-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="gen-progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="gen-progress-pct" aria-live="polite">
+        <span id="progress-pct">0%</span> complété
+      </div>
+
+      <!-- Agents Status Grid -->
+      <div class="agents-status-grid" id="agents-status-grid" role="list" aria-label="Statut des agents IA">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Streaming Window -->
+      <div class="streaming-window" aria-label="Aperçu de la génération en temps réel">
+        <div class="streaming-window-header">
+          <div class="streaming-window-dots" aria-hidden="true">
+            <div class="streaming-window-dot dot-red"></div>
+            <div class="streaming-window-dot dot-yellow"></div>
+            <div class="streaming-window-dot dot-green"></div>
+          </div>
+          <div class="streaming-window-title" id="streaming-agent-name">
+            ⏳ Initialisation des agents...
+          </div>
+        </div>
+        <div class="streaming-window-body" id="streaming-body">
+          <div id="stream-text" aria-live="polite"></div>
+          <span class="stream-cursor" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <!-- Abort Button -->
+      <div style="text-align:center;margin-top:24px;">
+        <button
+          type="button"
+          id="btn-abort"
+          class="btn btn-ghost btn-sm"
+          aria-label="Annuler la génération"
+        >
+          ✕ Annuler la génération
+        </button>
+      </div>
+
+    </div>
+    <!-- /view-generating -->
+
+    <!-- ─── RESULT VIEW ──────────────────────────────────────────── -->
+    <div id="view-result" style="display:none;flex-direction:column;flex:1;">
+
+      <!-- Result Header Bar -->
+      <div class="result-header">
+        <div class="result-header-left">
+          <h2 id="result-plan-name">Business Plan</h2>
+          <p id="result-plan-meta">Généré par PlanStart.ma</p>
+        </div>
+        <div class="result-header-actions">
+
+          <!-- Edit mode toggle -->
+          <div class="edit-mode-toggle" id="edit-mode-toggle" role="group" aria-label="Mode d'affichage">
+            <button type="button" class="edit-toggle-btn active" id="btn-mode-preview"
+              aria-pressed="true" title="Mode lecture">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              Aperçu
+            </button>
+            <button type="button" class="edit-toggle-btn" id="btn-mode-edit"
+              aria-pressed="false" title="Mode édition">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Éditer
+            </button>
+            <button type="button" class="edit-toggle-btn" id="btn-mode-split"
+              aria-pressed="false" title="Mode split (édition + aperçu)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/>
+              </svg>
+              Split
+            </button>
+          </div>
+
+          <div class="result-header-divider"></div>
+
+          <button type="button" id="btn-new-plan" class="btn btn-ghost btn-sm"
+            aria-label="Générer un nouveau plan">
+            ↩ Nouveau
+          </button>
+          <button type="button" id="btn-copy" class="btn btn-outline-gold btn-sm"
+            aria-label="Copier le plan">
+            📋 Copier
+          </button>
+
+          <button type="button" id="btn-export-word" class="btn btn-outline-gold btn-sm"
+            aria-label="Exporter en Word">
+            📝 Word
+          </button>
+          <button type="button" id="btn-export-pdf" class="btn btn-primary btn-sm"
+            aria-label="Exporter en PDF">
+            📄 PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Editor Toolbar (visible in edit/split mode) -->
+      <div class="editor-toolbar" id="editor-toolbar" style="display:none;" role="toolbar" aria-label="Barre d'outils de formatage">
+        <div class="editor-toolbar-group">
+          <button type="button" class="editor-tool-btn" data-action="h1" title="Titre H1">H1</button>
+          <button type="button" class="editor-tool-btn" data-action="h2" title="Titre H2">H2</button>
+          <button type="button" class="editor-tool-btn" data-action="h3" title="Titre H3">H3</button>
+        </div>
+        <div class="editor-toolbar-sep"></div>
+        <div class="editor-toolbar-group">
+          <button type="button" class="editor-tool-btn" data-action="bold" title="Gras (Ctrl+B)">
+            <strong>B</strong>
+          </button>
+          <button type="button" class="editor-tool-btn" data-action="italic" title="Italique (Ctrl+I)">
+            <em>I</em>
+          </button>
+          <button type="button" class="editor-tool-btn" data-action="strike" title="Barré">
+            <s>S</s>
+          </button>
+        </div>
+        <div class="editor-toolbar-sep"></div>
+        <div class="editor-toolbar-group">
+          <button type="button" class="editor-tool-btn" data-action="ul" title="Liste à puces">• Liste</button>
+          <button type="button" class="editor-tool-btn" data-action="ol" title="Liste numérotée">1. Liste</button>
+          <button type="button" class="editor-tool-btn" data-action="table" title="Insérer tableau">⊞ Tableau</button>
+          <button type="button" class="editor-tool-btn" data-action="hr" title="Séparateur">— Ligne</button>
+        </div>
+        <div class="editor-toolbar-sep"></div>
+        <div class="editor-toolbar-group">
+          <button type="button" class="editor-tool-btn editor-tool-save" id="btn-save-edits"
+            data-action="save" title="Sauvegarder les modifications">
+            ✓ Sauvegarder
+          </button>
+          <button type="button" class="editor-tool-btn editor-tool-reset" id="btn-reset-edits"
+            data-action="reset" title="Restaurer la version originale">
+            ↺ Restaurer
+          </button>
+        </div>
+        <div class="editor-toolbar-wordcount">
+          <span id="editor-wordcount">0 mots</span>
+        </div>
+      </div>
+
+      <!-- Main content area: Preview | Edit | Split -->
+      <div class="plan-result-body" id="plan-result-body">
+
+        <!-- PREVIEW panel (default) -->
+        <div class="plan-content-wrapper" id="panel-preview">
+          <div class="business-plan-doc" id="business-plan-doc" role="document">
+            <div id="plan-output">
+              <!-- Rendered by JS via marked.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- EDITOR panel (hidden by default) -->
+        <div class="plan-editor-wrapper" id="panel-editor" style="display:none;">
+          <div class="plan-editor-inner">
+            <div class="editor-hint" id="editor-hint">
+              <span class="editor-hint-dot"></span>
+              Mode édition — Modifiez le Markdown directement. Les changements sont prévisualisés en temps réel en mode Split.
+            </div>
+            <textarea
+              id="plan-editor-textarea"
+              class="plan-editor-textarea"
+              spellcheck="true"
+              placeholder="Le contenu Markdown de votre business plan apparaît ici pour édition..."
+              aria-label="Éditeur de business plan"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- SPLIT panel: editor left, preview right -->
+        <div class="plan-split-wrapper" id="panel-split" style="display:none;">
+          <div class="split-editor-pane">
+            <div class="split-pane-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Markdown (éditable)
+            </div>
+            <textarea
+              id="plan-split-textarea"
+              class="plan-editor-textarea"
+              spellcheck="true"
+              aria-label="Éditeur Markdown en mode split"
+            ></textarea>
+          </div>
+          <div class="split-divider" id="split-divider" title="Glisser pour redimensionner"></div>
+          <div class="split-preview-pane">
+            <div class="split-pane-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              Aperçu
+            </div>
+            <div class="split-preview-content">
+              <div class="business-plan-doc" id="split-preview-output">
+                <!-- Live preview -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /plan-result-body -->
+
+      <!-- Unsaved changes banner -->
+      <div class="unsaved-banner" id="unsaved-banner" style="display:none;" role="alert">
+        <span>⚠️ Modifications non sauvegardées</span>
+        <button type="button" class="unsaved-save-btn" id="btn-banner-save">Sauvegarder</button>
+        <button type="button" class="unsaved-discard-btn" id="btn-banner-discard">Ignorer</button>
+      </div>
+
+    </div>
+    <!-- /view-result -->
+
+  </main>
+  <!-- /app-main -->
+
+</div>
+<!-- /app-layout -->
+
+<!-- ── LIBRARIES ─────────────────────────────────────────────────── -->
+<!-- Marked.js — Markdown to HTML -->
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+
+<!-- html2pdf.js — PDF Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<!-- ── DEBUG: Global error catcher ──────────────────────────────── -->
+<script>
+  window.onerror = function(msg, src, line, col, err) {
+    const info = `JS Error: ${msg}\nSource: ${src}:${line}:${col}`;
+    console.error('🔴 GLOBAL ERROR:', info, err);
+    // Show toast if function available
+    if (typeof showToast === 'function') {
+      showToast('❌ JS Error: ' + msg.substring(0, 100), 'error');
+    }
+    return false;
+  };
+
+  window.addEventListener('unhandledrejection', function(e) {
+    const msg = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+    console.error('🔴 UNHANDLED PROMISE REJECTION:', msg, e.reason);
+    if (typeof showToast === 'function' && typeof setView === 'function') {
+      setView('empty');
+      let uiMsg = '❌ ' + msg.substring(0, 150);
+      if (msg.includes('401')) uiMsg = '❌ Clé API invalide (401). Vérifiez votre clé OpenRouter.';
+      else if (msg.includes('402')) uiMsg = '❌ Crédit OpenRouter insuffisant (402). Rechargez votre compte.';
+      else if (msg.includes('403')) uiMsg = '❌ Accès refusé (403). Vérifiez votre clé API.';
+      else if (msg.includes('429')) uiMsg = '❌ Trop de requêtes (429). Attendez et réessayez.';
+      else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) uiMsg = '❌ Erreur réseau. Vérifiez votre connexion.';
+      showToast(uiMsg, 'error');
+    }
+  });
+</script>
+
+<!-- ── APP SCRIPTS ───────────────────────────────────────────────── -->
+<script src="js/config.js"></script>
+<script src="js/prompts.js"></script>
+<script src="js/agents.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
