@@ -697,7 +697,7 @@ async function continueGeneration() {
     const response = await fetch(CONFIG.API_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Authorization': \`Bearer \${CONFIG.API_KEY_OPENROUTER}\`,
+        'Authorization': `Bearer ${CONFIG.API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': CONFIG.APP_URL,
         'X-Title': CONFIG.APP_NAME
