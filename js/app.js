@@ -5,7 +5,7 @@
 /* ── STATE ───────────────────────────────────────────────────────── */
 const App = {
   currentStep:    1,
-  totalSteps:     5,
+  totalSteps:     3,
   currentLang:    'fr',
   currentDetail:  'complet',
   orchestrator:   null,
@@ -15,29 +15,7 @@ const App = {
   agentProgress:  {},   // { agentId: 'pending'|'running'|'done' }
 
   // Form data — entrepreneur + project
-  formData: {
-    // Étape 1 – Fiche entrepreneur
-    entrepreneurTitle:    '',
-    entrepreneurName:     '',
-    entrepreneurActivity: '',
-    experience:           '',
-    legalForm:            '',
-    addressStreet:        '',
-    addressQuartier:      '',
-    addressCP:            '',
-    addressCity:          '',
-    email:                '',
-    phone:                '',
-    // Étape 2 – Projet
-    projectName:  '', sector: '', sectorLabel: '', sectorCategory: '',
-    description:  '',
-    // Étape 3 – Positionnement
-    problem: '', uniqueValue: '', targetClients: '',
-    // Étape 4 – Contexte Maroc
-    city: '', addressZone: '', capital: '', teamSize: '', openingDate: '',
-    // Étape 5 – Options
-    language: 'fr', detailLevel: 'complet'
-  }
+  formData: {}
 };
 
 let saveTimeout = null;
@@ -61,8 +39,7 @@ const $$ = sel => document.querySelectorAll(sel);
 /* ── INIT ────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initUI();
-  loadSavedSettings();
-  populateSelects();
+  initApp();
   bindEvents();
   setView('empty');
 });
@@ -79,86 +56,61 @@ function initUI() {
   renderStepPills();
 }
 
-function loadSavedSettings() {
-  // Plus besoin de charger la clé API (intégrée dans config.js)
-  const savedLang = localStorage.getItem(CONFIG.STORAGE_KEYS.LANG);
-  if (savedLang) setLanguage(savedLang);
+// ── Populate Selects ───────────────────────────────────────────
+function populateSelects() {
+  const titles = $('title-select');
+  if (titles) {
+    CONFIG.TITLES.forEach(t => titles.add(new Option(t.label, t.value)));
+  }
+  const exp = $('experience-select');
+  if (exp) {
+    CONFIG.EXPERIENCES.forEach(e => exp.add(new Option(e.label, e.value)));
+  }
+  const legal = $('legal-form-select');
+  if (legal) {
+    CONFIG.LEGAL_FORMS.forEach(l => legal.add(new Option(l.label, l.value)));
+  }
+
+  const citySel = $('city-select');
+  if (citySel) {
+    const marocCities = [
+      'Casablanca', 'Rabat', 'Marrakech', 'Tanger', 'Agadir', 
+      'Fès', 'Meknès', 'Oujda', 'Kénitra', 'Tétouan', 'Safi', 
+      'El Jadida', 'Nador', 'Béni Mellal', 'Autre'
+    ];
+    marocCities.forEach(city => citySel.add(new Option(city, city)));
+  }
+
+  const teamSel = $('team-select');
+  if (teamSel) {
+    ['1 (Seul)', '2 à 5 personnes', '6 à 10 personnes', '+10 personnes'].forEach(size => {
+      teamSel.add(new Option(size, size));
+    });
+  }
+
+  const sectorSel = $('sector-select');
+  if (sectorSel) {
+    CONFIG.SECTORS.forEach(secGroup => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = secGroup.icon + ' ' + secGroup.category;
+      secGroup.activities.forEach(act => {
+        const option = document.createElement('option');
+        option.value = act.value;
+        option.textContent = act.label;
+        if (act.keywords) option.dataset.keywords = act.keywords.join(',');
+        option.dataset.category = secGroup.category;
+        optgroup.appendChild(option);
+      });
+      sectorSel.appendChild(optgroup);
+    });
+  }
 }
 
-function populateSelects() {
-  // ── Sector select — optgroups by category ──────────────────────
-  const sectorSel = $('sector-select');
-  CONFIG.SECTORS.forEach(cat => {
-    const grp = document.createElement('optgroup');
-    grp.label = `${cat.icon}  ${cat.category}`;
-    cat.activities.forEach(act => {
-      const opt = document.createElement('option');
-      opt.value            = act.value;
-      opt.dataset.category = cat.category;
-      opt.dataset.icon     = cat.icon;
-      opt.textContent      = act.label;
-      grp.appendChild(opt);
-    });
-    sectorSel.appendChild(grp);
-  });
-
-  // Show badge when sector selected
-  sectorSel.addEventListener('change', () => {
-    const sel    = sectorSel.options[sectorSel.selectedIndex];
-    const badge  = $('sector-badge');
-    if (badge && sectorSel.value) {
-      badge.style.display = 'block';
-      badge.innerHTML = `<span class="sector-selected-badge">${sel.dataset.icon || ''} ${sel.dataset.category || ''} › ${sel.textContent}</span>`;
-    } else if (badge) {
-      badge.style.display = 'none';
-    }
-  });
-
-  // ── Entrepreneur title ─────────────────────────────────────────
-  const titleSel = $('entrepreneur-title');
-  if (titleSel) {
-    CONFIG.TITLES.forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t.value; opt.textContent = t.label;
-      titleSel.appendChild(opt);
-    });
-  }
-
-  // ── Experience ────────────────────────────────────────────────
-  const expSel = $('experience-select');
-  if (expSel) {
-    CONFIG.EXPERIENCE_YEARS.forEach(e => {
-      const opt = document.createElement('option');
-      opt.value = e.value; opt.textContent = e.label;
-      expSel.appendChild(opt);
-    });
-  }
-
-  // ── Legal form ─────────────────────────────────────────────────
-  const legalSel = $('legal-form-select');
-  if (legalSel) {
-    CONFIG.LEGAL_FORMS.forEach(l => {
-      const opt = document.createElement('option');
-      opt.value = l.value; opt.textContent = l.label;
-      legalSel.appendChild(opt);
-    });
-  }
-
-  // ── Cities ────────────────────────────────────────────────────
-  const citySel = $('city-select');
-  CONFIG.CITIES.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c; opt.textContent = c;
-    citySel.appendChild(opt);
-  });
-
-  // ── Team sizes ─────────────────────────────────────────────────
-  const teamSel = $('team-select');
-  CONFIG.TEAM_SIZES.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.value; opt.textContent = t.label;
-    teamSel.appendChild(opt);
-  });
+// ── INIT ────────────────────────────────────────────────────────
+function initApp() {
+  populateSelects();
+  const savedLang = localStorage.getItem(CONFIG.STORAGE_KEYS.LANG);
+  if (savedLang) setLanguage(savedLang);
 }
 
 /* ── EVENT BINDING ───────────────────────────────────────────────── */
@@ -212,15 +164,15 @@ function bindEvents() {
            $('my-plans-list').innerHTML = '<p style="text-align:center; color:#888;">Aucun plan sauvegardé.</p>';
            return;
         }
-        $('my-plans-list').innerHTML = plans.map(p => \`
+        $('my-plans-list').innerHTML = plans.map(p => `
           <div style="background:#2a2a3c; padding:15px; margin-bottom:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <div style="font-weight:bold; color:white; margin-bottom:4px;">\${p.project_name || 'Sans titre'}</div>
-              <div style="font-size:12px; color:#aaa;">\${new Date(p.updated_at).toLocaleString()} - \${p.status}</div>
+              <div style="font-weight:bold; color:white; margin-bottom:4px;">${p.project_name || 'Sans titre'}</div>
+              <div style="font-size:12px; color:#aaa;">${new Date(p.updated_at).toLocaleString()} - ${p.status}</div>
             </div>
-            <button onclick="window.loadPlan('\${p.id}')" class="btn btn-primary btn-sm">Ouvrir</button>
+            <button onclick="window.loadPlan('${p.id}')" class="btn btn-primary btn-sm">Ouvrir</button>
           </div>
-        \`).join('');
+        `).join('');
       } catch (e) {
         $('my-plans-list').innerHTML = '<p style="text-align:center; color:red;">Erreur de chargement.</p>';
       }
@@ -330,120 +282,60 @@ function updateStep() {
   $('btn-generate').style.display = isLast ? 'inline-flex' : 'none';
 }
 
-/* ── FORM VALIDATION — 5 étapes ─────────────────────────────────── */
+/* ── FORM VALIDATION — 3 étapes ─────────────────────────────────── */
 function validateCurrentStep() {
   const step = App.currentStep;
 
-  // ── Étape 1 : Fiche Entrepreneur ─────────────────────────────
+  // ── Étape 1 : Identité & Projet ───────────────────────────────
   if (step === 1) {
-    const titleVal  = $('entrepreneur-title')  ? $('entrepreneur-title').value  : '';
-    const nameVal   = $('entrepreneur-name')   ? $('entrepreneur-name').value.trim()  : '';
-    const actVal    = $('entrepreneur-activity') ? $('entrepreneur-activity').value.trim() : '';
-    const streetVal = $('address-street')      ? $('address-street').value.trim() : '';
-    if (!titleVal) {
-      showToast('⚠️ Sélectionnez votre titre professionnel', 'error');
-      return false;
-    }
-    if (!nameVal) {
-      showToast('⚠️ Entrez votre nom complet', 'error');
-      $('entrepreneur-name').focus();
-      return false;
-    }
-    if (!actVal) {
-      showToast('⚠️ Précisez votre activité / spécialité', 'error');
-      $('entrepreneur-activity').focus();
-      return false;
-    }
-    if (!streetVal) {
-      showToast('⚠️ Entrez l\'adresse professionnelle (rue)', 'error');
-      $('address-street').focus();
-      return false;
-    }
-    App.formData.entrepreneurTitle    = titleVal;
-    App.formData.entrepreneurName     = nameVal;
-    App.formData.entrepreneurActivity = actVal;
-    App.formData.experience           = $('experience-select')  ? $('experience-select').value  : '';
-    App.formData.legalForm            = $('legal-form-select')  ? $('legal-form-select').value  : '';
-    App.formData.addressStreet        = streetVal;
-    App.formData.addressQuartier      = $('address-quartier')   ? $('address-quartier').value.trim() : '';
-    App.formData.addressCP            = $('address-cp')         ? $('address-cp').value.trim()        : '';
-    App.formData.email                = $('entrepreneur-email') ? $('entrepreneur-email').value.trim() : '';
-    App.formData.phone                = $('entrepreneur-phone') ? $('entrepreneur-phone').value.trim() : '';
-  }
+    const name = $('entrepreneur-name').value.trim();
+    const act  = $('entrepreneur-activity').value.trim();
+    const proj = $('project-name').value.trim();
+    const sec  = $('sector-select').value;
+    
+    if (!name) { showToast('⚠️ Entrez votre nom complet', 'error'); $('entrepreneur-name').focus(); return false; }
+    if (!act) { showToast('⚠️ Précisez votre activité / spécialité', 'error'); $('entrepreneur-activity').focus(); return false; }
+    if (!proj) { showToast('⚠️ Entrez le nom de votre projet', 'error'); $('project-name').focus(); return false; }
+    if (!sec) { showToast('⚠️ Sélectionnez un secteur', 'error'); return false; }
 
-  // ── Étape 2 : Le Projet ────────────────────────────────────────
-  if (step === 2) {
-    const name   = $('project-name').value.trim();
-    const sector = $('sector-select').value;
-    const desc   = $('description').value.trim();
-    if (!name) {
-      showToast('⚠️ Entrez le nom de votre cabinet / structure', 'error');
-      $('project-name').focus();
-      return false;
-    }
-    if (!sector) {
-      showToast('⚠️ Sélectionnez votre secteur d\'activité précis', 'error');
-      return false;
-    }
-    if (!desc) {
-      showToast('⚠️ Décrivez votre projet', 'error');
-      $('description').focus();
-      return false;
-    }
-    App.formData.projectName = name;
-    App.formData.sector      = sector;
+    App.formData.entrepreneurName     = name;
+    App.formData.entrepreneurActivity = act;
+    App.formData.entrepreneurTitle    = $('title-select') ? $('title-select').options[$('title-select').selectedIndex]?.text : '';
+    App.formData.entrepreneurExp      = $('experience-select') ? $('experience-select').options[$('experience-select').selectedIndex]?.text : '';
+    App.formData.legalForm            = $('legal-form-select') ? $('legal-form-select').options[$('legal-form-select').selectedIndex]?.text : '';
+    App.formData.projectName          = proj;
+    App.formData.sector               = sec;
     const selOpt = $('sector-select').options[$('sector-select').selectedIndex];
-    App.formData.sectorLabel    = selOpt.textContent;
-    App.formData.sectorCategory = selOpt.dataset ? selOpt.dataset.category || '' : '';
-    App.formData.description    = desc;
+    App.formData.sectorLabel          = selOpt.textContent;
+    App.formData.sectorCategory       = selOpt.dataset ? selOpt.dataset.category || '' : '';
   }
 
-  // ── Étape 3 : Vision & Positionnement ─────────────────────────
-  if (step === 3) {
-    const prob  = $('problem').value.trim();
-    const uval  = $('unique-value').value.trim();
-    if (!prob) {
-      showToast('⚠️ Décrivez le problème / besoin identifié', 'error');
-      $('problem').focus();
-      return false;
-    }
-    if (!uval) {
-      showToast('⚠️ Décrivez votre proposition de valeur unique', 'error');
-      $('unique-value').focus();
-      return false;
-    }
+  // ── Étape 2 : Marché & Contexte ─────────────────────────────────
+  if (step === 2) {
+    const desc = $('description').value.trim();
+    const prob = $('problem').value.trim();
+    const uval = $('unique-value').value.trim();
+    const city = $('city-select').value;
+    const cap  = $('capital').value.trim();
+    
+    if (!desc) { showToast('⚠️ Décrivez votre projet', 'error'); $('description').focus(); return false; }
+    if (!prob) { showToast('⚠️ Décrivez le problème ciblé', 'error'); $('problem').focus(); return false; }
+    if (!uval) { showToast('⚠️ Entrez votre proposition de valeur', 'error'); $('unique-value').focus(); return false; }
+    if (!city) { showToast('⚠️ Sélectionnez la ville', 'error'); return false; }
+    if (!cap) { showToast('⚠️ Entrez le budget', 'error'); $('capital').focus(); return false; }
+
+    App.formData.description   = desc;
     App.formData.problem       = prob;
     App.formData.uniqueValue   = uval;
     App.formData.targetClients = $('target-clients') ? $('target-clients').value.trim() : '';
+    App.formData.city          = city;
+    App.formData.addressZone   = $('address-zone') ? $('address-zone').value.trim() : '';
+    App.formData.capital       = cap;
+    App.formData.teamSize      = $('team-select') ? $('team-select').value : '';
   }
 
-  // ── Étape 4 : Contexte Maroc ───────────────────────────────────
-  if (step === 4) {
-    const city    = $('city-select').value;
-    const capital = $('capital').value.trim();
-    const team    = $('team-select').value;
-    if (!city) {
-      showToast('⚠️ Sélectionnez la ville d\'implantation', 'error');
-      return false;
-    }
-    if (!capital) {
-      showToast('⚠️ Entrez le budget d\'investissement', 'error');
-      $('capital').focus();
-      return false;
-    }
-    if (!team) {
-      showToast('⚠️ Sélectionnez la taille de l\'équipe', 'error');
-      return false;
-    }
-    App.formData.city        = city;
-    App.formData.addressZone = $('address-zone')  ? $('address-zone').value.trim()  : '';
-    App.formData.capital     = capital;
-    App.formData.teamSize    = team;
-    App.formData.openingDate = $('opening-date')  ? $('opening-date').value.trim()  : '';
-  }
-
-  // ── Étape 5 : Options ─────────────────────────────────────────
-  if (step === 5) {
+  // ── Étape 3 : Options ───────────────────────────────────────────
+  if (step === 3) {
     App.formData.language    = App.currentLang;
     App.formData.detailLevel = App.currentDetail;
   }

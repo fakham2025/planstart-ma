@@ -44,6 +44,14 @@ const CONFIG = {
     { value: 'autre',label: 'Autre titre' }
   ],
 
+  // ── Expériences professionnelles ───────────────────────────────
+  EXPERIENCES: [
+    { value: '0-2', label: '0 à 2 ans (Jeune diplômé / Débutant)' },
+    { value: '3-5', label: '3 à 5 ans (Confirmé)' },
+    { value: '5-10', label: '5 à 10 ans (Sénior)' },
+    { value: '10+', label: '+10 ans (Expert)' }
+  ],
+
   // ── Secteurs précis au Maroc (par catégorie avec optgroups) ────
   // Structure: { category, icon, activities: [{value, label, keywords}] }
   SECTORS: [
