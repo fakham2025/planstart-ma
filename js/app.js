@@ -58,7 +58,7 @@ function initUI() {
 
 // ── Populate Selects ───────────────────────────────────────────
 function populateSelects() {
-  const titles = $('title-select');
+  const titles = $('entrepreneur-title');
   if (titles) {
     CONFIG.TITLES.forEach(t => titles.add(new Option(t.label, t.value)));
   }
