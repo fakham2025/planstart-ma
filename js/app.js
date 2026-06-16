@@ -448,9 +448,48 @@ async function startGeneration() {
     App.currentPlanId = await SupabaseClient.savePlan(null, fd.projectName, '', 'generating');
     await App.orchestrator.run(App.formData, App.currentLang);
   } catch (err) {
-    const msg = err && err.message ? err.message : String(err);
-    if (msg !== 'ABORTED') {
-      handleError(err);
+    console.error('Plan generation error:', err);
+    
+    // Instead of aborting and hiding the view, we keep the view and show the error!
+    if (App.orchestrator) {
+      App.orchestrator.abort();
+      App.orchestrator = null;
+    }
+    
+    let errMsg = err.message || '';
+    let msg = '❌ Erreur de génération.';
+
+    if (errMsg.includes('429')) {
+      msg = '❌ L\'API a bloqué la requête (Trop de requêtes). Veuillez réessayer dans 1 minute.';
+    } else if (errMsg.includes('400')) {
+      msg = '❌ L\'API a rejeté la requête. Raison: ' + errMsg;
+    } else if (errMsg.includes('Timeout')) {
+      msg = '❌ Le modèle IA est surchargé et n\'a pas répondu à temps (Timeout). Réessayez.';
+    } else if (errMsg.includes('500') || errMsg.includes('502') || errMsg.includes('503')) {
+      msg = '❌ Erreur serveur OpenRouter. Réessayez dans quelques instants.';
+    } else if (errMsg.includes('CORS') || errMsg.includes('cors')) {
+      msg = '❌ Erreur CORS. Ouvrez le fichier via un serveur local (voir instructions).';
+    } else if (errMsg) {
+      msg = `❌ Erreur: ${errMsg.substring(0, 150)}`;
+    }
+
+    showToast(msg, 'error');
+    
+    // Show the error on the UI directly so the user has a trace
+    const progressText = document.getElementById('progress-text');
+    if (progressText) {
+      progressText.innerHTML = `<span style="color: #ef4444; font-weight: bold;">${msg}</span>`;
+    }
+    const btnCancel = document.getElementById('btn-cancel-generation');
+    if (btnCancel) {
+      btnCancel.innerHTML = 'Retour';
+      btnCancel.onclick = () => setView('empty');
+    }
+  } finally {
+    const btn = document.getElementById('btn-generate-plan');
+    if (btn) {
+      btn.innerHTML = '✨ Générer un nouveau plan';
+      btn.disabled = false;
     }
   }
 }
