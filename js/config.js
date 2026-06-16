@@ -12,9 +12,13 @@ const CONFIG = {
   APP_URL:      'https://planstart.ma',
   SITE_TITLE:   'PlanStart.ma',
 
-  // Modèle gratuit, rapide et stable pour les longues générations
-  DEFAULT_MODEL: 'openai/gpt-oss-120b:free',
-  
+  // Modèles gratuits avec fallback (repli automatique)
+  FALLBACK_MODELS: [
+    'openai/gpt-oss-120b:free',
+    'qwen/qwen-2.5-coder-32b-instruct:free',
+    'meta-llama/llama-3.2-3b-instruct:free',
+    'openrouter/free'
+  ],
   // Limites
   MAX_TOKENS: 8000,
   TEMPERATURE:   1,

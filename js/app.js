@@ -195,7 +195,7 @@ function bindEvents() {
       App.generatedMeta = { projectName: plan.project_name };
       
       if (plan.content) {
-        if (typeof Editor !== 'undefined') Editor.init(plan.content);
+        if (typeof initEditor === 'function') initEditor(plan.content);
         displayBusinessPlan(plan.content, App.generatedMeta);
         setView('result');
         if (typeof renderMarkdownToPreview === 'function') renderMarkdownToPreview(plan.content);
@@ -419,7 +419,7 @@ async function startGeneration() {
     project:      fd.projectName,
     sector:       fd.sectorLabel,
     city:         fd.city,
-    model:        CONFIG.DEFAULT_MODEL,
+    model:        CONFIG.FALLBACK_MODELS[0],
     lang:         fd.language
   });
 
@@ -550,7 +550,6 @@ function handleError(err) {
 }
 
 function handleComplete(result) {
-  Editor.init(result.finalPlan);
   App.generatedPlan = result.finalPlan;
   App.generatedMeta = result.metadata;
   
@@ -566,7 +565,19 @@ function handleComplete(result) {
     initEditor(result.finalPlan);
   }
 
-  showToast('✅ Business plan généré ! Vous pouvez l\'éditer avant export.', 'success');
+  showToast('✅ Plan généré ! Téléchargement auto des 3 formats en cours...', 'success');
+
+  // Lancement automatique des téléchargements avec un petit décalage
+  // pour éviter le blocage par le navigateur des fenêtres multiples.
+  setTimeout(() => {
+    if (typeof exportHTML === 'function') exportHTML();
+    setTimeout(() => {
+      if (typeof exportWord === 'function') exportWord();
+      setTimeout(() => {
+        if (typeof exportPDF === 'function') exportPDF();
+      }, 1500);
+    }, 1500);
+  }, 1500);
 }
 
 function abortGeneration() {
@@ -742,7 +753,7 @@ async function continueGeneration() {
         'X-Title': CONFIG.APP_NAME
       },
       body: JSON.stringify({
-        model: CONFIG.DEFAULT_MODEL,
+        model: CONFIG.FALLBACK_MODELS[0],
         messages: [
           { role: 'system', content: 'Tu es un expert rédacteur de business plans. Tu dois continuer la rédaction du document de manière fluide, professionnelle, sans rien répéter et sans introduction.' },
           { role: 'user', content: "Continue exactement là où tu t'es arrêté dans le texte suivant, commence par la suite immédiate :\n\n" + App.generatedPlan.slice(-2000) }

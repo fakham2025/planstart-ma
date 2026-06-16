@@ -76,6 +76,80 @@ const PROMPTS = {
 `;
   },
 
+  /* ── MEGA PROMPT (Single Shot MVP) ────────────────────────────── */
+  megaPrompt(data, lang) {
+    const langInstr = this.langInstruction(lang);
+    const entrepreneur = this.entrepreneurBlock(data);
+    const context = this.projectContext(data);
+
+    return [
+      {
+        role: 'system',
+        content: `Tu es un consultant expert en stratégie d'entreprise et rédacteur de business plans de niveau investisseur pour le marché marocain. Tu maîtrises l'analyse de marché au Maroc, les modèles économiques, et les projections financières (en MAD). Tu dois rédiger l'INTÉGRALITÉ du business plan en une seule réponse exhaustive et professionnelle. ${langInstr}`
+      },
+      {
+        role: 'user',
+        content: `Rédige un business plan COMPLET et PROFESSIONNEL de niveau investisseur pour ce projet :
+
+${entrepreneur}
+${context}
+
+Tu dois générer le document avec EXACTEMENT ces 12 sections. Sois très précis, utilise des données réalistes pour le marché marocain, et intègre des tableaux financiers cohérents :
+
+# BUSINESS PLAN — ${data.projectName}
+*Préparé pour : ${data.entrepreneurName || 'Le porteur de projet'} — Confidentiel — ${this.today()}*
+
+---
+
+## 1. 📋 Résumé Exécutif
+[Synthèse percutante de 300-400 mots qui donne envie de lire la suite. Inclure : problème, solution, marché cible, modèle de revenus, traction envisagée, équipe, besoin de financement]
+
+## 2. 👤 Présentation du Porteur de Projet
+[Profil complet de l'entrepreneur, son expérience, ses qualifications, sa légitimité dans ce secteur. Adresse : ${[data.addressStreet, data.addressQuartier, data.city].filter(Boolean).join(', ')}]
+
+## 3. 🚀 Présentation du Projet
+[Description détaillée du projet, vision, mission, valeurs. Services/produits offerts. Positionnement dans le secteur ${data.sectorLabel}]
+
+## 4. 📊 Analyse du Marché Marocain — ${data.city}
+[Taille du marché adressable, tendances macro-économiques au Maroc, analyse de la concurrence locale à ${data.city}, opportunités et parts de marché convoitées]
+
+## 5. 💡 Modèle Économique & Étude Technique
+[Business Model Canvas simplifié, procédé, capacité de production, modèle de monétisation, approvisionnements et modalités]
+
+## 6. 📣 Organisation Commerciale
+[Segments clients, canaux de distribution au Maroc, stratégie d'acquisition, politique de prix en MAD, modalités de règlement clients]
+
+## 7. ⚙️ Moyens d'Exploitation (Capacité & RH)
+[Terrains, constructions, matériel (neuf/occasion), effectifs existants et à recruter, masse salariale prévisionnelle]
+
+## 8. 💰 Coût du Programme & Plan de Financement
+[Détail de l'utilisation du capital de ${data.capital} MAD : Frais préliminaires, terrain, équipement, BFR. Répartition du financement : capital, apport CCA, crédit bancaire]
+
+## 9. 📊 Compte d'Exploitation Prévisionnel (5 ans)
+[Génère un VRAI tableau Markdown des 5 premières années (A1 à A5) avec : Chiffre d'Affaires, Achats, Marge Brute, Frais personnel, Charges externes, Amortissements, Résultat Net, Cash-Flow. Ajoute le ROI et le seuil de rentabilité]
+
+## 10. ⚖️ Cadre Juridique & Réglementaire
+[Forme juridique recommandée au Maroc — ${data.legalForm ? CONFIG.LEGAL_FORMS.find(l=>l.value===data.legalForm)?.label || '' : 'SARL/SA/Auto-entrepreneur'} — démarches de création, réglementations spécifiques au secteur, impôts IS/IR/TVA]
+
+## 11. ⚠️ Analyse des Risques & Mitigation
+[Matrice des risques sectoriels, marché, financiers, réglementaires au Maroc et stratégies d'atténuation]
+
+## 12. 📅 Planning de Réalisation de l'Investissement
+[Étapes clés, délais de mise en œuvre, date d'ouverture : ${data.openingDate || 'à définir'}]
+
+---
+
+Assure-toi que chaque section est :
+✅ Professionnelle et convaincante pour un investisseur marocain
+✅ Contextualisée au marché de ${data.city} et au secteur ${data.sectorLabel}
+✅ Cohérente avec le budget initial de ${Number(data.capital).toLocaleString('fr-MA')} MAD
+
+⚠️ INSTRUCTION CRITIQUE ⚠️
+TU DOIS IMPÉRATIVEMENT ÉCRIRE LES 12 SECTIONS JUSQU'À LA TOUTE DERNIÈRE (Section 12). C'EST VITAL. NE T'ARRÊTE SOUS AUCUN PRÉTEXTE AVANT LA FIN DU DOCUMENT. LE RENDU DOIT ÊTRE EN FORMAT MARKDOWN ET D'UN SEUL BLOC.`
+      }
+    ];
+  },
+
   /* ── AGENT 1: MARKET ANALYSIS (Marché Maroc) ─────────────────── */
   market(data, lang) {
     const langInstr = this.langInstruction(lang);
