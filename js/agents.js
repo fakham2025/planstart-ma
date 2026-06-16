@@ -32,11 +32,15 @@ class AgentOrchestrator {
     let currentMessages = [...messages];
     let fullContent = '';
     let isFinished = false;
-
     let loopCount = 0;
     while (!isFinished && loopCount < 3) {
       loopCount++;
       if (this.aborted) throw new Error('ABORTED');
+      
+      // Set a 60-second timeout for the fetch request to prevent infinite hanging
+      const timeoutId = setTimeout(() => {
+        if (this._controller) this._controller.abort('TIMEOUT');
+      }, 60000);
 
       const requestBody = {
         model:       this.model,
@@ -59,8 +63,14 @@ class AgentOrchestrator {
           },
           body: JSON.stringify(requestBody)
         });
+        clearTimeout(timeoutId);
       } catch (fetchErr) {
+        clearTimeout(timeoutId);
         const msg = fetchErr.message || String(fetchErr);
+        if (fetchErr.name === 'AbortError' || msg.includes('TIMEOUT')) {
+           console.error(`[${agentId}] Fetch timeout (60s). The model is hanging.`);
+           throw new Error(`Le modèle IA met trop de temps à répondre (Timeout).`);
+        }
         console.error(`[${agentId}] Fetch error:`, msg);
         throw new Error(`Network error: ${msg}`);
       }

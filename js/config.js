@@ -12,9 +12,11 @@ const CONFIG = {
   APP_URL:      'https://planstart.ma',
   SITE_TITLE:   'PlanStart.ma',
 
-  // ── Modèle fixe ────────────────────────────────────────────────
-  DEFAULT_MODEL: 'nex-agi/nex-n2-pro:free',
-  MAX_TOKENS:    8000,
+  // Modèle gratuit, rapide et stable pour les longues générations
+  DEFAULT_MODEL: 'google/gemini-2.0-flash-lite-preview-02-05:free',
+  
+  // Limites
+  MAX_TOKENS: 8000,
   TEMPERATURE:   1,
 
   // ── Statuts juridiques marocains ───────────────────────────────
