@@ -1,7 +1,7 @@
 /* ================================================================
    AGENTS.JS — PlanStart.ma Multi-Agent Orchestrator
    Architecture: McKinsey/BCG inspired 6-agent pipeline
-   Modèle: Claude Sonnet 4.5 Thinking (clé dans config.js)
+   Modèle: nex-agi/nex-n2-pro:free (OpenRouter)
    ================================================================ */
 
 class AgentOrchestrator {
