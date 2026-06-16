@@ -13,7 +13,7 @@ const CONFIG = {
   SITE_TITLE:   'PlanStart.ma',
 
   // Modèle gratuit, rapide et stable pour les longues générations
-  DEFAULT_MODEL: 'openrouter/free',
+  DEFAULT_MODEL: 'openai/gpt-oss-120b:free',
   
   // Limites
   MAX_TOKENS: 8000,
