@@ -289,23 +289,15 @@ const CONFIG = {
     FORM_DATA: 'planstart_form_data'
   },
 
-  // ── Configuration des 6 Agents IA ─────────────────────────────
+  // ── Configuration des 3 Agents IA ─────────────────────────────
   AGENTS: [
     {
       id:     'market',
-      name:   'Agent Marché',
-      nameAr: 'وكيل السوق',
-      role:   'Analyse de marché & data',
+      name:   'Stratégie & Marché',
+      nameAr: 'الاستراتيجية والسوق',
+      role:   'Analyse & Modèle Économique',
       icon:   '📊',
       avatar: 'img/agent_market.png',
-      color:  '#C9A84C'
-    },
-    {
-      id:     'business',
-      name:   'Agent Business',
-      nameAr: 'وكيل الأعمال',
-      role:   'Modèle économique & stratégie',
-      icon:   '💼',
       color:  '#C9A84C'
     },
     {
@@ -314,30 +306,16 @@ const CONFIG = {
       nameAr: 'وكيل المالية',
       role:   'Projections financières (MAD)',
       icon:   '💰',
+      avatar: 'img/agent_financial.png',
       color:  '#C9A84C'
     },
     {
       id:     'writer',
-      name:   'Agent Rédacteur',
-      nameAr: 'وكيل الكتابة',
-      role:   'Rédaction du business plan',
+      name:   'Rédacteur Final',
+      nameAr: 'الكاتب النهائي',
+      role:   'Rédaction du business plan complet',
       icon:   '✍️',
-      color:  '#C9A84C'
-    },
-    {
-      id:     'audit',
-      name:   'Agent Audit',
-      nameAr: 'وكيل التدقيق',
-      role:   'Red Team — Critique indépendante',
-      icon:   '🔍',
-      color:  '#C9A84C'
-    },
-    {
-      id:     'validator',
-      name:   'Agent Validateur',
-      nameAr: 'وكيل التحقق',
-      role:   'Version finale optimisée',
-      icon:   '✅',
+      avatar: 'img/agent_writer.png',
       color:  '#1E9E75'
     }
   ]
