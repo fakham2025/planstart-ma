@@ -123,10 +123,10 @@ Tu dois générer le document avec EXACTEMENT ces 12 sections. Sois très préci
 [Terrains, constructions, matériel (neuf/occasion), effectifs existants et à recruter, masse salariale prévisionnelle]
 
 ## 8. 💰 Coût du Programme & Plan de Financement
-[Détail de l'utilisation du capital de ${data.capital} MAD : Frais préliminaires, terrain, équipement, BFR. Répartition du financement : capital, apport CCA, crédit bancaire]
+[Génère deux tableaux clairs. 1/ "Coût du programme" avec 4 lignes obligatoires : Frais préliminaires, Aménagement, Matériel d'exploitation, BFR. Total = ${Number(data.capital).toLocaleString('fr-MA')} MAD. 2/ "Plan de financement" avec 2 lignes : Autofinancement (10%) et Crédit bancaire type Intelaka (90%).]
 
 ## 9. 📊 Compte d'Exploitation Prévisionnel (5 ans)
-[Génère un VRAI tableau Markdown des 5 premières années (A1 à A5) avec : Chiffre d'Affaires, Achats, Marge Brute, Frais personnel, Charges externes, Amortissements, Résultat Net, Cash-Flow. Ajoute le ROI et le seuil de rentabilité]
+[Génère un VRAI tableau Markdown des 5 premières années (N+1 à N+5) avec les lignes bancaires standards marocaines : Chiffre d'Affaires (+10%/an), Achats de consommables (30% du CA), Autres charges externes, Frais du personnel (incluant Charges sociales à 25%), Impôts et taxes (Taxe Pro, Service communaux), Amortissements, Résultat avant impôt, IS-IR, Résultat Net, et Cash-Flow. Ajoute le ratio de couverture (CF/Amortissement)]
 
 ## 10. ⚖️ Cadre Juridique & Réglementaire
 [Forme juridique recommandée au Maroc — ${data.legalForm ? CONFIG.LEGAL_FORMS.find(l=>l.value===data.legalForm)?.label || '' : 'SARL/SA/Auto-entrepreneur'} — démarches de création, réglementations spécifiques au secteur, impôts IS/IR/TVA]
@@ -421,10 +421,10 @@ Rédige le business plan COMPLET avec ces 12 sections (sois exhaustif pour chaqu
 [Terrains, constructions, matériel (neuf/occasion), effectifs existants et à recruter, masse salariale]
 
 ## 8. 💰 Coût du Programme & Plan de Financement
-[Détail du coût d'investissement : terrain, équipement, BFR. Répartition du financement : capital, apport CCA, crédit bancaire sollicité]
+[Génère deux tableaux clairs. 1/ "Coût du programme" avec 4 lignes obligatoires : Frais préliminaires, Aménagement, Matériel d'exploitation, BFR. Total = ${Number(data.capital).toLocaleString('fr-MA')} MAD. 2/ "Plan de financement" avec 2 lignes : Autofinancement (10%) et Crédit bancaire type Intelaka (90%).]
 
 ## 9. 📊 Compte d'Exploitation Prévisionnel (5 ans)
-[Tableau détaillé des 5 premières années avec CA, Achats, Frais personnel, Résultat Net et Cash-Flow. Seuil de rentabilité]
+[Génère un VRAI tableau Markdown des 5 premières années (N+1 à N+5) avec les lignes bancaires standards marocaines : Chiffre d'Affaires (+10%/an), Achats de consommables (30% du CA), Autres charges externes, Frais du personnel (incluant Charges sociales à 25%), Impôts et taxes (Taxe Pro, Service communaux), Amortissements, Résultat avant impôt, IS-IR, Résultat Net, et Cash-Flow. Ajoute le ratio de couverture (CF/Amortissement)]
 
 ## 10. ⚖️ Cadre Juridique & Réglementaire
 [Forme juridique recommandée au Maroc — ${data.legalForm ? CONFIG.LEGAL_FORMS.find(l=>l.value===data.legalForm)?.label || '' : 'SARL/SA/Auto-entrepreneur'} — démarches CRI/OMPIC, licences professionnelles requises]
